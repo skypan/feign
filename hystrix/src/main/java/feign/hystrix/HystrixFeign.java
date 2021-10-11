@@ -38,10 +38,12 @@ import feign.codec.ErrorDecoder;
  */
 public final class HystrixFeign {
 
+  // TODO 创建一个新的HystrixFeignBuilder示例
   public static Builder builder() {
     return new Builder();
   }
 
+  // TODO 重写了build方法
   public static final class Builder extends Feign.Builder {
 
     private Contract contract = new Contract.Default();
@@ -138,16 +140,19 @@ public final class HystrixFeign {
     }
 
     /** Configures components needed for hystrix integration. */
+    // TODO 重载的build方法，替换了基类的InvocationHandlerFactory
     Feign build(final FallbackFactory<?> nullableFallbackFactory) {
       super.invocationHandlerFactory(new InvocationHandlerFactory() {
         @Override
         public InvocationHandler create(Target target,
                                         Map<Method, MethodHandler> dispatch) {
+          // TODO 生成Hystrix调用处理器
           return new HystrixInvocationHandler(target, dispatch, setterFactory,
               nullableFallbackFactory);
         }
       });
       super.contract(new HystrixDelegatingContract(contract));
+      // TODO 调用基类的build方法ReflectiveFeign示例
       return super.build();
     }
 

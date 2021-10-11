@@ -1,5 +1,5 @@
 /**
- * Copyright 2012-2019 The Feign Authors
+ * Copyright 2012-2021 The Feign Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -31,7 +31,9 @@ import static feign.Util.checkNotNull;
 
 public class ReflectiveFeign extends Feign {
 
+  // TODO 方法解析器
   private final ParseHandlersByName targetToHandlersByName;
+  // TODO 调用处理器工厂 生成JDK的InvocationHandler的实现类
   private final InvocationHandlerFactory factory;
   private final QueryMapEncoder queryMapEncoder;
 
@@ -49,7 +51,9 @@ public class ReflectiveFeign extends Feign {
   @SuppressWarnings("unchecked")
   @Override
   public <T> T newInstance(Target<T> target) {
+    // TODO 方法名和方法处理器映射 通过contract解析
     Map<String, MethodHandler> nameToHandler = targetToHandlersByName.apply(target);
+    // TODO 方法和方法处理器映射
     Map<Method, MethodHandler> methodToHandler = new LinkedHashMap<Method, MethodHandler>();
     List<DefaultMethodHandler> defaultMethodHandlers = new LinkedList<DefaultMethodHandler>();
 
@@ -65,6 +69,7 @@ public class ReflectiveFeign extends Feign {
       }
     }
     InvocationHandler handler = factory.create(target, methodToHandler);
+    // TODO 生成的JDK代理
     T proxy = (T) Proxy.newProxyInstance(target.type().getClassLoader(),
         new Class<?>[] {target.type()}, handler);
 
@@ -150,9 +155,13 @@ public class ReflectiveFeign extends Feign {
       this.decoder = checkNotNull(decoder, "decoder");
     }
 
+    // TODO RPC接口元数据解析
     public Map<String, MethodHandler> apply(Target key) {
+      // TODO 解析方法，返回一个方法元数据列表
+      // TODO contract 远程调用协议规则类
       List<MethodMetadata> metadata = contract.parseAndValidatateMetadata(key.type());
       Map<String, MethodHandler> result = new LinkedHashMap<String, MethodHandler>();
+      // TODO 迭代RPC方法元数据列表
       for (MethodMetadata md : metadata) {
         BuildTemplateByResolvingArgs buildTemplate;
         if (!md.formParams().isEmpty() && md.template().bodyTemplate() == null) {
@@ -162,6 +171,7 @@ public class ReflectiveFeign extends Feign {
         } else {
           buildTemplate = new BuildTemplateByResolvingArgs(md, queryMapEncoder);
         }
+        // TODO 通过方法处理器工厂factory创建SynchronousMethodHandler同步方法处理实例
         result.put(md.configKey(),
             factory.create(key, md, buildTemplate, options, decoder, errorDecoder));
       }

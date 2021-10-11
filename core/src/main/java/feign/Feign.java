@@ -1,5 +1,5 @@
 /**
- * Copyright 2012-2019 The Feign Authors
+ * Copyright 2012-2021 The Feign Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -247,17 +247,21 @@ public abstract class Feign {
       return target(new HardCodedTarget<T>(apiType, url));
     }
 
+    // TODO 创建RPC客户端的动态代理实例
     public <T> T target(Target<T> target) {
       return build().newInstance(target);
     }
 
     public Feign build() {
+      // TODO 方法处理器工厂实例
       SynchronousMethodHandler.Factory synchronousMethodHandlerFactory =
           new SynchronousMethodHandler.Factory(client, retryer, requestInterceptors, logger,
               logLevel, decode404, closeAfterDecode, propagationPolicy);
+      // TODO RPC方法解析器
       ParseHandlersByName handlersByName =
           new ParseHandlersByName(contract, options, encoder, decoder, queryMapEncoder,
               errorDecoder, synchronousMethodHandlerFactory);
+      // TODO 反射式Feign实例
       return new ReflectiveFeign(handlersByName, invocationHandlerFactory, queryMapEncoder);
     }
   }

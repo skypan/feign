@@ -1,5 +1,5 @@
 /**
- * Copyright 2012-2019 The Feign Authors
+ * Copyright 2012-2021 The Feign Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -36,6 +36,7 @@ import static feign.Util.checkNotNull;
 final class HystrixInvocationHandler implements InvocationHandler {
 
   private final Target<?> target;
+  // TODO key为RPC接口的反射实例，value为方法处理器
   private final Map<Method, MethodHandler> dispatch;
   private final FallbackFactory<?> fallbackFactory; // Nullable
   private final Map<Method, Method> fallbackMethodMap;
@@ -101,6 +102,7 @@ final class HystrixInvocationHandler implements InvocationHandler {
       return toString();
     }
 
+    // TODO 创建一个HystrixCommand命令，对同步命令执行器做进一步分装
     HystrixCommand<Object> hystrixCommand =
         new HystrixCommand<Object>(setterMethodMap.get(method)) {
           @Override
@@ -152,6 +154,7 @@ final class HystrixInvocationHandler implements InvocationHandler {
           }
         };
 
+    // TODO 根据method返回值类型，或返回hystrixCommand，或直接执行
     if (Util.isDefault(method)) {
       return hystrixCommand.execute();
     } else if (isReturnsHystrixCommand(method)) {
@@ -167,6 +170,7 @@ final class HystrixInvocationHandler implements InvocationHandler {
     } else if (isReturnsCompletableFuture(method)) {
       return new ObservableCompletableFuture<>(hystrixCommand);
     }
+    // TODO 默认直接执行
     return hystrixCommand.execute();
   }
 
